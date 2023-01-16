@@ -20,5 +20,5 @@ emcc sprite.c -o sprite.html -Ideps/sokol -Ideps/stb --preload-file assets -s EX
 ## Dependencies
 
 * [sdl2](https://github.com/libsdl-org/SDL) (builtin in Emscripten)
-* [sokol](https://github.com/floooh/sokol) (#21c9d47)
+* [sokol](https://github.com/floooh/sokol) (#6920b84)
 * [stb](https://github.com/nothings/stb) (#8b5f1f3)
