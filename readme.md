@@ -8,6 +8,9 @@ Minimal sprite rendering example written in C with [`SDL2`](https://github.com/l
 ```bash
 git clone https://github.com/floooh/sokol deps/sokol
 git clone https://github.com/nothings/stb deps/stb
+
+# else init/update submodules
+git submodule update --init
 ```
 2. Add an image (_sky.png_) in `assets` directory
 3. Compile and build with the following command (need Emscripten installed):
