@@ -20,7 +20,7 @@
 #include "stb_image.h"
 
 // macros
-#define CODE(...) #__VA_ARGS__
+#define SHADER_SOURCE(...) "#version 300 es\n" #__VA_ARGS__
 
 // globals
 SDL_Window* sdl_window;
@@ -175,7 +175,7 @@ int main(int argc, const char* argv[]) {
             .name = "tex", 
             .image_type = SG_IMAGETYPE_2D
         },
-        .vs.source = "#version 300 es\n" CODE(
+        .vs.source = SHADER_SOURCE(
             precision mediump float;
             in vec2 position;
             in vec2 texcoord0;
@@ -185,7 +185,7 @@ int main(int argc, const char* argv[]) {
                 uv = texcoord0;
             }
         ),
-        .fs.source = "#version 300 es\n" CODE(
+        .fs.source = SHADER_SOURCE(
             precision mediump float;
             uniform sampler2D tex;
             in vec2 uv;
