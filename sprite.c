@@ -14,6 +14,7 @@
 //#define SOKOL_DEBUG
 #define SOKOL_GLES3
 #include "sokol_gfx.h"
+#include "sokol_log.h"
 
 // stb_image
 #define STB_IMAGE_IMPLEMENTATION
@@ -31,7 +32,7 @@ static struct {
     sg_bindings bind;
     sg_pass_action pass_action;
 } state = {
-    .pass_action.colors[0] = { .action = SG_ACTION_CLEAR, .value = { 0.0f, 0.0f, 0.0f, 1.0f } }
+    .pass_action.colors[0] = { .load_action = SG_LOADACTION_CLEAR, .clear_value = { 0.0f, 0.0f, 0.0f, 1.0f } }
 };
 
 
@@ -99,7 +100,7 @@ int main(int argc, const char* argv[]) {
 
     gl_context = SDL_GL_CreateContext(sdl_window);
     SDL_GL_MakeCurrent(sdl_window, gl_context);
-    SDL_GL_SetSwapInterval(0);
+    //SDL_GL_SetSwapInterval(0);
     assert(gl_context);
 
 
@@ -126,7 +127,7 @@ int main(int argc, const char* argv[]) {
 
     /* setup sokol_gfx */
     
-    sg_setup(&(sg_desc){0});
+    sg_setup(&(sg_desc){ .logger.func = slog_func });
     assert(sg_isvalid());
 
     const float vertices[] = {
@@ -156,7 +157,7 @@ int main(int argc, const char* argv[]) {
     unsigned char *pixels = stbi_load("assets/sky.png", &w, &h, &n, STBI_rgb_alpha);
     assert(pixels);
     
-    state.bind.fs_images[0] = sg_make_image(&(sg_image_desc){
+    state.bind.fs.images[0] = sg_make_image(&(sg_image_desc){
         .width = w,
         .height = h,
         .data.subimage[0][0] = {
@@ -166,14 +167,15 @@ int main(int argc, const char* argv[]) {
     });
     stbi_image_free(pixels);
 
+    state.bind.fs.samplers[0] = sg_make_sampler(&(sg_sampler_desc){
+        .min_filter = SG_FILTER_NEAREST,
+        .mag_filter = SG_FILTER_NEAREST,
+    });
+
     sg_shader shd = sg_make_shader(&(sg_shader_desc){
         .attrs = {
             [0].name = "position",
             [1].name = "texcoord0"
-        },
-        .fs.images[0] = {
-            .name = "tex", 
-            .image_type = SG_IMAGETYPE_2D
         },
         .vs.source = SHADER_SOURCE(
             precision mediump float;
@@ -193,7 +195,18 @@ int main(int argc, const char* argv[]) {
             void main(){
                 frag_color = texture(tex, uv);
             }
-        )
+        ),
+        .fs.images[0] = {
+            .used = true,
+            .image_type = SG_IMAGETYPE_2D
+        },
+        .fs.samplers[0].used = true,
+        .fs.image_sampler_pairs[0] = { 
+            .used = true, 
+            .glsl_name = "tex", 
+            .image_slot = 0, 
+            .sampler_slot = 0
+        },
     });
 
     state.pip = sg_make_pipeline(&(sg_pipeline_desc){
